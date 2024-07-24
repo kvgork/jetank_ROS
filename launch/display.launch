@@ -1,0 +1,10 @@
+<launch>
+  <!-- Load the URDF into the parameter server -->
+  <param name="robot_description" command="cat $(find robot_main)/urdf/jetank.urdf"/>
+
+  <!-- Publish robot state -->
+  <node pkg="robot_state_publisher" name="robot_state_publisher" type="robot_state_publisher"/>
+
+  <!-- Launch RViz -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find robot_main)/rviz/jetank.rviz" />
+</launch>
