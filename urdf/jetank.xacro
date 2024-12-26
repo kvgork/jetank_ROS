@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<robot name="jetank" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Base link -->
+  <link name="base_link" />
+
+  <!-- Main robot frame -->
+  <link name="chassis">
+    <visual>
+      <origin xyz="0 0 ${ground_clearance+(chassis_height/2)}" />
+      <geometry>
+        <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.0 0.0 ${(ground_clearance+(chassis_height/2))}"/>
+      <geometry>
+        <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+      </geometry>
+    </collision>
+  </link>
+
+
+
+  <joint name="base_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="chassis"/>
+  </joint>
+</robot>

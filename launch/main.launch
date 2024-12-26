@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="robot_main" type="robot.py" name="robot_motors" output="screen">
+    <param name="track_width" value="0.5"/>
+  </node>
+</launch>
