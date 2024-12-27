@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <launch>
   <!-- Load the URDF into the parameter server -->
   <param name="robot_description" command="xacro $(find robot_main)/urdf/jetank.xacro"/>

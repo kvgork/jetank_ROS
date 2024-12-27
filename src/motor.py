@@ -1,3 +1,4 @@
+#!/usr/bin/env python2
 # Taken from the jetbot package at https://github.com/waveshare/jetbot
 import atexit
 from Adafruit_MotorHAT import Adafruit_MotorHAT
