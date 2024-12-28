@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <launch>
   <node pkg="robot_main" type="robot.py" name="robot_motors" output="screen">
-    <param name="track_width" value="0.5"/>
+    <param name="track_width" value="0.11"/>
   </node>
+
+  <node pkg="robot_main" type="camera.py" name="camera_publisher" output="screen"> </node>
 </launch>
