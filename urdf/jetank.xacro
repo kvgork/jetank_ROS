@@ -1,5 +1,9 @@
 <?xml version="1.0"?>
 <robot name="jetank" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  
+  <xacro:include filename="$(find robot_main)/urdf/properties.xacro"/>
+  <xacro:include filename="$(find robot_main)/urdf/jetank_wheel.xacro"/>
+  <xacro:include filename="$(find robot_main)/urdf/jetank_arm.xacro"/>
 
   <!-- Base link -->
   <link name="base_link" />
@@ -26,4 +30,15 @@
     <parent link="base_link"/>
     <child link="chassis"/>
   </joint>
+
+      <!-- Instantiate wheels -->
+  <xacro:wheel prefix="left_front" x="${((chassis_length/2)-(0.02+wheel_radius))}" y="${-((chassis_width / 2)+(wheel_length/2))}" z="${wheel_radius}"/>
+  <xacro:wheel prefix="right_front" x="${((chassis_length/2)-(0.02+wheel_radius))}" y="${((chassis_width / 2)+(wheel_length/2))}" z="${wheel_radius}"/>
+
+  <xacro:wheel prefix="left_middle" x="0" y="${-((chassis_width / 2)+(wheel_length/2))}" z="${wheel_radius}"/>
+  <xacro:wheel prefix="right_middle" x="0" y="${((chassis_width / 2)+(wheel_length/2))}" z="${wheel_radius}"/>
+
+  <xacro:wheel prefix="left_back" x="${-((chassis_length/2)-(0.02+wheel_radius))}" y="${-((chassis_width / 2)+(wheel_length/2))}" z="${wheel_radius}"/>
+  <xacro:wheel prefix="right_back" x="${-((chassis_length/2)-(0.02+wheel_radius))}" y="${((chassis_width / 2)+(wheel_length/2))}" z="${wheel_radius}"/>
+
 </robot>

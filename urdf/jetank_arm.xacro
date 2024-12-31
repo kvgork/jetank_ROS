@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<!-- Links -->
+  <!-- Base Link -->
+  <link name="arm_base_link">
+    <visual>
+      <geometry>
+        <box size="${arm_base_length} ${arm_base_width} ${arm_base_heigth}"/>
+      </geometry>
+    </visual>
+  </link>
+  <!-- Camera Link -->
+  <link name="arm_camera_link">
+    <visual>
+      <geometry>
+        <box size="${arm_camera_length} ${arm_camera_width} ${arm_camera_heigth}"/>
+      </geometry>
+    </visual>
+  </link>
+  <!-- Long Link -->
+  <link name="arm_long_link">
+    <visual>
+      <geometry>
+        <box size="${arm_long_length} ${arm_long_width} ${arm_long_heigth}"/>
+      </geometry>
+    </visual>
+  </link>
+  <!-- Short Link -->
+  <link name="arm_short_link">
+    <visual>
+      <geometry>
+        <box size="${arm_short_length} ${arm_short_width} ${arm_short_heigth}"/>
+      </geometry>
+    </visual>
+  </link>
+
+<!-- Joints -->
+  <!-- Arm base to chassis joint -->
+  <joint name="chassis_to_arm_base_joint" type="revolute">
+    <parent link="chassis"/>
+    <child link="arm_base_link"/>
+    <origin xyz="${(chassis_length/2)-0.055} 0 ${chassis_height/2}" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10.0" lower="-1.0" upper="1.0" velocity="1.0"/>
+  </joint>
+
+  <!-- Camera to arm base joint -->
+  <joint name="arm_base_to_camera_joint" type="revolute">
+    <parent link="arm_base_link"/>
+    <child link="arm_camera_link"/>
+    <origin xyz="${(arm_base_length/2)-0.01} 0 ${-arm_base_heigth/2+0.1}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="10.0" lower="-1.0" upper="1.0" velocity="1.0"/>
+  </joint>
+
+  <!-- Long link to arm base joint -->
+  <joint name="arm_base_to_long_joint" type="revolute">
+    <parent link="arm_base_link"/>
+    <child link="arm_long_link"/>
+    <origin xyz="${(arm_base_length/2)-0.01} 0 ${-arm_base_heigth/2+0.1}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="10.0" lower="-1.0" upper="1.0" velocity="1.0"/>
+  </joint>
+
+  <!-- Short link to long link joint -->
+  <joint name="arm_base_to_short_joint" type="revolute">
+    <parent link="arm_long_link"/>
+    <child link="arm_short_link"/>
+    <origin xyz="${(arm_base_length/2)-0.01} 0 ${-arm_base_heigth/2+0.1}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="10.0" lower="-1.0" upper="1.0" velocity="1.0"/>
+  </joint>
+
+
+
+</robot>
