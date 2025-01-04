@@ -11,26 +11,31 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 
 
-class Camera(SingletonConfigurable):
+class StereoCamera(SingletonConfigurable):
     
-    value = traitlets.Any()
-    
+    left_value = traitlets.Any()
+    right_value = traitlets.Any()
+
     # config
     width = traitlets.Integer(default_value=224).tag(config=True)
     height = traitlets.Integer(default_value=224).tag(config=True)
     fps = traitlets.Integer(default_value=21).tag(config=True)
     capture_width = traitlets.Integer(default_value=3280).tag(config=True)
     capture_height = traitlets.Integer(default_value=2464).tag(config=True)
+    left_sensor_id = traitlets.Integer(default_value=0).tag(config=True)
+    right_sensor_id = traitlets.Integer(default_value=1).tag(config=True)
 
     def __init__(self, *args, **kwargs):
-        self.value = np.empty((self.height, self.width, 3), dtype=np.uint8)
-        super(Camera, self).__init__(*args, **kwargs)
+        super(StereoCameraCamera, self).__init__(*args, **kwargs)
+        self.left_value = np.empty((self.height, self.width, 3), dtype=np.uint8)
+        self.right_value = np.empty((self.height, self.width, 3), dtype=np.uint8)
 
         # Initialize the ROS node
-        rospy.init_node('camera_publisher', anonymous=True)
+        rospy.init_node('stereo_camera_publisher', anonymous=True)
 
         # Create a publisher to publish to the /camera/image_raw topic
-        self.image_pub = rospy.Publisher('/camera/image_raw', Image, queue_size=10)
+        self.left_image_pub = rospy.Publisher('/camera/left/image_raw', Image, queue_size=10)
+        self.right_image_pub = rospy.Publisher('/camera/right/image_raw', Image, queue_size=10)
 
         # Use CvBridge to convert between OpenCV and ROS image formats
         self.bridge = CvBridge()
@@ -39,73 +44,69 @@ class Camera(SingletonConfigurable):
         self.rate = rospy.Rate(10)  # 10 Hz
 
         try:
-            self.cap = cv2.VideoCapture(self._gst_str(), cv2.CAP_GSTREAMER)
+            self.left_cap = cv2.VideoCapture(self._gst_str(sensor_id=left_sensor_id), cv2.CAP_GSTREAMER)
+            self.right_cap = cv2.VideoCapture(self._gst_str(sensor_id=right_sensor_id), cv2.CAP_GSTREAMER)
+            
+            left_re, left_image = self.left_cap.read()
+            right_re, right_image = self.right_cap.read()
 
-            re, image = self.cap.read()
+            if not left_re:
+                raise RuntimeError('Could not read image from left camera.')
+            if not right_re:
+                raise RuntimeError('Could not read image from right camera.')
 
-            if not re:
-                raise RuntimeError('Could not read image from camera.')
-
-            self.value = image
+            self.left_value = left_image
+            self.right_value = right_image
             self.start()
         except:
             self.stop()
             raise RuntimeError(
-                'Could not initialize camera.  Please see error trace.')
+                'Could not initialize cameras.  Please see error trace.')
 
         atexit.register(self.stop)
 
-    # def _capture_frames(self):
-    #     while True:
-    #         re, image = self.cap.read()
-    #         if re:
-    #             self.value = image
-    #         else:
-    #             break
                 
     def _gst_str(self):
-        # return 'nvarguscamerasrc ! video/x-raw(memory:NVMM), width=%d, height=%d, format=(string)NV12, framerate=(fraction)%d/1 ! nvvidconv ! video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! videoconvert ! appsink' % (
-        #         self.capture_width, self.capture_height, self.fps, self.width, self.height)
         return (
-        "nvarguscamerasrc ! video/x-raw(memory:NVMM), width=%d, height=%d, format=(string)NV12, "
-        "framerate=%d/1 ! nvvidconv ! video/x-raw, width=%d, height=%d, format=(string)BGRx ! "
-        "videoconvert ! appsink"
-        % (self.capture_width, self.capture_height, self.fps, self.width, self.height)
-    )
+            "nvarguscamerasrc sensor-id=%d ! video/x-raw(memory:NVMM), width=%d, height=%d, "
+            "format=(string)NV12, framerate=%d/1 ! nvvidconv ! video/x-raw, "
+            "width=%d, height=%d, format=(string)BGRx ! videoconvert ! appsink"
+            % (sensor_id, self.capture_width, self.capture_height, self.fps, self.width, self.height)
+        )
     
     def start(self):
-        if not self.cap.isOpened():
-            self.cap.open(self._gst_str(), cv2.CAP_GSTREAMER)
-        # if not hasattr(self, 'thread') or not self.thread.isAlive():
-        #     self.thread = threading.Thread(target=self._capture_frames)
-        #     self.thread.start()
-        while not rospy.is_shutdown():
-            ret, frame = self.cap.read()
-            if ret:
-                # Convert the OpenCV frame to a ROS Image message
-                ros_image = self.frame_to_ros_image(frame)
+        if not self.left_cap.isOpened():
+            self.left_cap.open(self._gst_str(sensor_id=left_sensor_id), cv2.CAP_GSTREAMER)
+        if not self.right_cap.isOpened():
+            self.tight_cap.open(self._gst_str(sensor_id=right_sensor_id), cv2.CAP_GSTREAMER)
 
+        while not rospy.is_shutdown():
+            left_re, left_image = self.left_cap.read()
+            right_re, right_image = self.right_cap.read()
+            if left_re and right_re:
                 # Publish the image
-                self.image_pub.publish(ros_image)
-                rospy.loginfo("Published camera frame.")
+                self.left_image_pub.publish(self.frame_to_ros_image(frame_left, "left"))
+                self.right_image_pub.publish(self.frame_to_ros_image(frame_right, "right"))
+                rospy.loginfo("Published stereo camera frames.")
             else:
-                rospy.logwarn("Failed to capture frame.")
+                rospy.logwarn("Failed to capture frames from both cameras.")
             
             self.rate.sleep()
 
     def stop(self):
-        if hasattr(self, 'cap'):
-            self.cap.release()
-        # if hasattr(self, 'thread'):
-        #     self.thread.join()
+        if self.left_cap.isOpened():
+            self.left_cap.release()
+        if self.right_cap.isOpened():
+            self.right_cap.release()
             
     def restart(self):
         self.stop()
         self.start()
     
-    def frame_to_ros_image(self, frame):
+    def frame_to_ros_image(self, frame, side):
         ros_image = Image()
         ros_image.header.stamp = rospy.Time.now()
+        ros_image.header.frame_id = side
         ros_image.height = frame.shape[0]  # Image height
         ros_image.width = frame.shape[1]   # Image width
         ros_image.encoding = "bgr8"
@@ -115,6 +116,6 @@ class Camera(SingletonConfigurable):
 
 if __name__ == '__main__':
     try:
-        Camera()
+        StereoCamera()
     except rospy.ROSInterruptException:
         pass
