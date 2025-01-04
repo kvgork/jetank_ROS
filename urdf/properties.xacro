@@ -10,6 +10,8 @@
   <xacro:property name="ground_clearance" value="0.01"/>
 
   <!-- Arm parameters -->
+  <xacro:property name="arm_bearing_radius" value="0.02"/>
+  <xacro:property name="arm_bearing_height" value="0.01"/>
   <xacro:property name="arm_base_length" value="0.070"/>
   <xacro:property name="arm_base_width" value="0.045"/>
   <xacro:property name="arm_base_heigth" value="0.075"/>
@@ -21,6 +23,6 @@
   <xacro:property name="arm_long_heigth" value="0.025"/>
   <xacro:property name="arm_short_length" value="0.115"/>
   <xacro:property name="arm_short_width" value="0.045"/>
-  <xacro:property name="arm_short_heigth" value="0.02`"/>
+  <xacro:property name="arm_short_heigth" value="0.02"/>
 
 </robot>

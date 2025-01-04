@@ -8,6 +8,7 @@
   <!-- Base Link -->
   <link name="arm_base_link">
     <visual>
+      <origin rpy="0 0 0" xyz="0.065 0 0.125"/>
       <geometry>
         <box size="0.07 0.045 0.075"/>
       </geometry>
@@ -33,7 +34,7 @@
   <link name="arm_short_link">
     <visual>
       <geometry>
-        <box size="0.115 0.045 0.02`"/>
+        <box size="0.115 0.045 0.02"/>
       </geometry>
     </visual>
   </link>
@@ -58,7 +59,7 @@
   <joint name="arm_base_to_long_joint" type="revolute">
     <parent link="arm_base_link"/>
     <child link="arm_long_link"/>
-    <origin rpy="0 0 0" xyz="0.025 0 0.0625"/>
+    <origin rpy="0 0 0" xyz="-0.005 0 -0.0625"/>
     <axis xyz="0 1 0"/>
     <limit effort="10.0" lower="-1.0" upper="1.0" velocity="1.0"/>
   </joint>
@@ -66,7 +67,7 @@
   <joint name="arm_base_to_short_joint" type="revolute">
     <parent link="arm_long_link"/>
     <child link="arm_short_link"/>
-    <origin rpy="0 0 0" xyz="0.025 0 0.0625"/>
+    <origin rpy="0 0 0" xyz="0.05 0 0"/>
     <axis xyz="0 1 0"/>
     <limit effort="10.0" lower="-1.0" upper="1.0" velocity="1.0"/>
   </joint>

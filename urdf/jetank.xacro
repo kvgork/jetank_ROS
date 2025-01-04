@@ -11,13 +11,13 @@
   <!-- Main robot frame -->
   <link name="chassis">
     <visual>
-      <origin xyz="0 0 ${ground_clearance+(chassis_height/2)}" />
+      <!-- <origin xyz="0 0 ${ground_clearance+(chassis_height/2)}" /> -->
       <geometry>
         <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
       </geometry>
     </visual>
     <collision>
-      <origin xyz="0.0 0.0 ${(ground_clearance+(chassis_height/2))}"/>
+      <!-- <origin xyz="0.0 0.0 ${(ground_clearance+(chassis_height/2))}"/> -->
       <geometry>
         <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
       </geometry>
@@ -29,16 +29,17 @@
   <joint name="base_joint" type="fixed">
     <parent link="base_link"/>
     <child link="chassis"/>
+    <origin xyz="0.0 0.0 ${(ground_clearance+(chassis_height/2))}"/>
   </joint>
 
       <!-- Instantiate wheels -->
-  <xacro:wheel prefix="left_front" x="${((chassis_length/2)-(0.02+wheel_radius))}" y="${-((chassis_width / 2)+(wheel_length/2))}" z="${wheel_radius}"/>
-  <xacro:wheel prefix="right_front" x="${((chassis_length/2)-(0.02+wheel_radius))}" y="${((chassis_width / 2)+(wheel_length/2))}" z="${wheel_radius}"/>
+  <xacro:wheel prefix="left_front" x="${((chassis_length/2)-(0.02+wheel_radius))}" y="${-((chassis_width / 2)+(wheel_length/2))}" z="${-wheel_radius}"/>
+  <xacro:wheel prefix="right_front" x="${((chassis_length/2)-(0.02+wheel_radius))}" y="${((chassis_width / 2)+(wheel_length/2))}" z="${-wheel_radius}"/>
 
-  <xacro:wheel prefix="left_middle" x="0" y="${-((chassis_width / 2)+(wheel_length/2))}" z="${wheel_radius}"/>
-  <xacro:wheel prefix="right_middle" x="0" y="${((chassis_width / 2)+(wheel_length/2))}" z="${wheel_radius}"/>
+  <xacro:wheel prefix="left_middle" x="0" y="${-((chassis_width / 2)+(wheel_length/2))}" z="${-wheel_radius}"/>
+  <xacro:wheel prefix="right_middle" x="0" y="${((chassis_width / 2)+(wheel_length/2))}" z="${-wheel_radius}"/>
 
-  <xacro:wheel prefix="left_back" x="${-((chassis_length/2)-(0.02+wheel_radius))}" y="${-((chassis_width / 2)+(wheel_length/2))}" z="${wheel_radius}"/>
-  <xacro:wheel prefix="right_back" x="${-((chassis_length/2)-(0.02+wheel_radius))}" y="${((chassis_width / 2)+(wheel_length/2))}" z="${wheel_radius}"/>
+  <xacro:wheel prefix="left_back" x="${-((chassis_length/2)-(0.02+wheel_radius))}" y="${-((chassis_width / 2)+(wheel_length/2))}" z="${-wheel_radius}"/>
+  <xacro:wheel prefix="right_back" x="${-((chassis_length/2)-(0.02+wheel_radius))}" y="${((chassis_width / 2)+(wheel_length/2))}" z="${-wheel_radius}"/>
 
 </robot>
