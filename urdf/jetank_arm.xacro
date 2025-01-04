@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+<!--TODO FIX ROTATION PLACE-->
+
 <!-- Links -->
   <!-- Bearing -->
   <link name="arm_bearing_link">
@@ -26,6 +28,7 @@
       <geometry>
         <box size="${arm_camera_length} ${arm_camera_width} ${arm_camera_heigth}"/>
       </geometry>
+      <origin xyz="${arm_camera_length/2} 0 0" rpy="0 0 0"/>
     </visual>
   </link>
   <!-- Long Link -->
@@ -34,6 +37,7 @@
       <geometry>
         <box size="${arm_long_length} ${arm_long_width} ${arm_long_heigth}"/>
       </geometry>
+      <origin xyz="${arm_long_length/2} 0 0" rpy="0 0 0"/>
     </visual>
   </link>
   <!-- Short Link -->
@@ -42,32 +46,33 @@
       <geometry>
         <box size="${arm_short_length} ${arm_short_width} ${arm_short_heigth}"/>
       </geometry>
+      <origin xyz="${arm_long_length/2} 0 0" rpy="0 0 0"/>
     </visual>
   </link>
 
 <!-- Joints -->
   <!-- Arm bearing to chassis -->
-  <joint name="chassis_to_arm_bearing_joint" type="continuous">
+  <joint name="chassis_to_arm_bearing_joint" type="revolute">
     <parent link="chassis"/>
     <child link="arm_bearing_link"/>
     <origin xyz="${(chassis_length/2)-0.055} 0 ${(chassis_height/2)+(arm_bearing_height/2)}" rpy="0 0 0"/>
     <axis xyz="0 0 1"/>
+    <limit effort="10.0" lower="-1.0" upper="1.0" velocity="1.0"/>
   </joint>
 
   <!-- Arm base to arm bearing -->
-  <joint name="arm_base_to_arm_bearing_joint" type="revolute">
+  <joint name="arm_base_to_arm_bearing_joint" type="continuous">
     <parent link="arm_bearing_link"/>
     <child link="arm_base_link"/>
     <origin xyz="${((arm_base_length/2)-arm_bearing_radius)} 0 ${(arm_bearing_height/2)+(arm_base_heigth/2)}" rpy="0 0 0"/>
     <axis xyz="0 0 1"/>
-    <limit effort="10.0" lower="-1.0" upper="1.0" velocity="1.0"/>
   </joint>
 
   <!-- Camera to arm base joint -->
   <joint name="arm_base_to_camera_joint" type="revolute">
     <parent link="arm_base_link"/>
     <child link="arm_camera_link"/>
-    <origin xyz="${(arm_base_length/2)-0.01+(arm_camera_length/2)} 0 ${-(arm_base_heigth/2)+0.01}" rpy="0 0 0"/>
+    <origin xyz="${(arm_base_length/2)-0.01} 0 ${-(arm_base_heigth/2)+0.01}" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
     <limit effort="10.0" lower="-1.0" upper="1.0" velocity="1.0"/>
   </joint>
@@ -76,16 +81,16 @@
   <joint name="arm_base_to_long_joint" type="revolute">
     <parent link="arm_base_link"/>
     <child link="arm_long_link"/>
-    <origin xyz="${(-arm_base_length/2)+0.03+(arm_long_length/2)} 0 ${arm_base_heigth/2-0.01}" rpy="0 0 0"/>
+    <origin xyz="${(-arm_base_length/2)+0.03} 0 ${arm_base_heigth/2-0.01}" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
     <limit effort="10.0" lower="-1.0" upper="1.0" velocity="1.0"/>
   </joint>
 
   <!-- Short link to long link joint -->
-  <joint name="arm_base_to_short_joint" type="revolute">
+  <joint name="arm_long_to_short_joint" type="revolute">
     <parent link="arm_long_link"/>
     <child link="arm_short_link"/>
-    <origin xyz="${(arm_long_length/2)-0.01+(arm_short_length/2)} 0 0" rpy="0 0 0"/>
+    <origin xyz="${(arm_long_length)-0.01} 0 0" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
     <limit effort="10.0" lower="-1.0" upper="1.0" velocity="1.0"/>
   </joint>

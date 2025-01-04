@@ -7,7 +7,9 @@
   <node pkg="robot_state_publisher" name="robot_state_publisher" type="robot_state_publisher"/>
 
   <!-- Publish joint state -->
-  <node pkg="joint_state_publisher" name="joint_state_publisher" type="joint_state_publisher"/>
+  <node pkg="joint_state_publisher" name="joint_state_publisher" type="joint_state_publisher">
+    <param name="use_gui" value="TRUE"/>
+  </node>
 
   <!-- Launch RViz -->
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find robot_main)/rviz/jetank.rviz" />
