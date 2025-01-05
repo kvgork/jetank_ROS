@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+  <node pkg="robot_main" type="servo_control.py" name="scservo_controller" output="screen">
+    <rosparam file="$(find robot_arm_description)/config/scservo_control.yaml" command="load"/>
+  </node>
+
+  <!-- Start MoveIt -->
+  <include file="$(find robot_arm_moveit_config)/launch/move_group.launch"/>
+</launch>

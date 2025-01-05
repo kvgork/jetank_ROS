@@ -1,0 +1,14 @@
+scservo_controller:
+  port_name: /dev/ttyUSB0  # USB-to-TTL adapter
+  baud_rate: 1000000       # SCS15 default baudrate
+  servos:
+    - id: 1
+      joint_name: chassis_to_arm_bearing_joint
+    - id: 2
+      joint_name: arm_base_to_camera_joint
+    - id: 3
+      joint_name: arm_base_to_long_joint
+    - id: 4
+      joint_name: arm_long_to_short_joint
+    # - id: 5
+    #   joint_name: upper_arm_to_forearm
