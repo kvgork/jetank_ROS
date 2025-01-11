@@ -1,13 +1,10 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-<!--TODO FIX ROTATION PLACE-->
-
 <!-- Links -->
   <!-- Bearing -->
   <link name="arm_bearing_link">
     <visual>
-      <!-- <origin xyz="${(chassis_length/2)-(arm_base_length/2)} 0 ${(chassis_height/2)+arm_base_heigth+arm_bearing_height}" rpy="0 0 0"/> -->
       <geometry>
         <cylinder length="${arm_bearing_height}" radius="${arm_bearing_radius}"/>
       </geometry>
@@ -16,7 +13,6 @@
   <!-- Base Link -->
   <link name="arm_base_link">
     <visual>
-      <!-- <origin xyz="${(chassis_length/2)-(arm_base_length/2)} 0 ${(chassis_height/2)+arm_base_heigth+arm_bearing_height}" rpy="0 0 0"/> -->
       <geometry>
         <box size="${arm_base_length} ${arm_base_width} ${arm_base_heigth}"/>
       </geometry>
@@ -94,7 +90,5 @@
     <axis xyz="0 1 0"/>
     <limit effort="10.0" lower="-1.0" upper="1.0" velocity="1.0"/>
   </joint>
-
-
 
 </robot>
