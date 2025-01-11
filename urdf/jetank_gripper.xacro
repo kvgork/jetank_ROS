@@ -20,23 +20,36 @@
     <origin xyz="${arm_short_length+(gripper_base_length/2)} ${0.01} ${(gripper_base_heigth/2)}" rpy="0 0 0"/>
   </joint>
 
-  <xacro:macro name="finger" params="prefix x y z direction">
-    <link name="${prefix}_finger_link">
-      <visual>
-        <geometry>
-          <box size="${gripper_finger_length} ${gripper_finger_width} ${gripper_finger_heigth}"/>
-        </geometry>
-      </visual>
-    </link>
-    <joint name="${prefix}_finger_joint" type="prismatic">
-      <parent link="gripper_base_link"/>
-      <child link="${prefix}_finger_link"/>
-      <origin xyz="${x} ${y} ${z}" rpy="0 0 0"/>
-      <limit lower="0" upper="${gripper_finger_range}" effort="10.0" velocity="1.0"/>
-      <axis xyz="0 ${direction} 0"/>
-    </joint>
-  </xacro:macro>
+  
+  <link name="left_finger_link">
+    <visual>
+      <geometry>
+        <box size="${gripper_finger_length} ${gripper_finger_width} ${gripper_finger_heigth}"/>
+      </geometry>
+    </visual>
+  </link>
+  <joint name="left_finger_joint" type="prismatic">
+    <parent link="gripper_base_link"/>
+    <child link="left_finger_link"/>
+    <origin xyz="${gripper_finger_length/2} ${(gripper_finger_range+(gripper_finger_width/2))-0.01} 0" rpy="0 0 0"/>
+    <limit lower="0" upper="${gripper_finger_range}" effort="10.0" velocity="1.0"/>
+    <axis xyz="0 -1 0"/>
+  </joint>
 
-  <xacro:finger prefix="left" x="${gripper_finger_length/2}" y="${(gripper_finger_range+(gripper_finger_width/2))-0.01}" z="0" direction="-1"/>
-  <xacro:finger prefix="right" x="${gripper_finger_length/2}" y="${-(gripper_finger_range+(gripper_finger_width/2))-0.01}" z="0" direction="1"/>
+  <link name="right_finger_link">
+    <visual>
+      <geometry>
+        <box size="${gripper_finger_length} ${gripper_finger_width} ${gripper_finger_heigth}"/>
+      </geometry>
+    </visual>
+  </link>
+  <joint name="right_finger_joint" type="prismatic">
+    <parent link="gripper_base_link"/>
+    <child link="right_finger_link"/>
+    <origin xyz="${gripper_finger_length/2} ${-(gripper_finger_range+(gripper_finger_width/2))-0.01} 0" rpy="0 0 0"/>
+    <limit lower="0" upper="${gripper_finger_range}" effort="10.0" velocity="1.0"/>
+    <axis xyz="0 1 0"/>
+    <mimic joint="left_finger_joint" multiplier="-1.0" offset="0.0"/>
+  </joint>
+
 </robot>

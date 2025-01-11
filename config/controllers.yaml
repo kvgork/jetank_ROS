@@ -1,0 +1,10 @@
+controller_list:
+  - name: scservo_controller
+    action_ns: follow_joint_trajectory
+    type: FollowJointTrajectory
+    joints:
+      - arm_base_to_long_joint
+      - arm_long_to_short_joint
+      - chassis_to_arm_bearing_joint
+      - left_finger_joint
+      - arm_base_to_camera_joint
