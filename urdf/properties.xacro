@@ -31,6 +31,6 @@
   <xacro:property name="gripper_base_heigth" value="0.06"/>
   <xacro:property name="gripper_finger_length" value="0.06"/>
   <xacro:property name="gripper_finger_width" value="0.03"/>
-  <xacro:property name="gripper_finger_heigth" value="0.025"/>
+  <xacro:property name="gripper_finger_heigth" value="0.02"/>
   <xacro:property name="gripper_finger_range" value="0.02"/>
 </robot>

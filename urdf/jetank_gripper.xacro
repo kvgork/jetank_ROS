@@ -14,11 +14,10 @@
 
 <!-- Joints -->
   <!-- Gripper base to arm -->
-  <joint name="arm_base_to_arm_bearing_joint" type="fixed">
+  <joint name="gripper_base_to_arm_joint" type="fixed">
     <parent link="arm_short_link"/>
     <child link="gripper_base_link"/>
     <origin xyz="${arm_short_length+(gripper_base_length/2)} ${0.01} ${(gripper_base_heigth/2)}" rpy="0 0 0"/>
-    <!-- <axis xyz="0 0 1"/> -->
   </joint>
 
   <xacro:macro name="finger" params="prefix x y z direction">
@@ -29,7 +28,7 @@
         </geometry>
       </visual>
     </link>
-    <joint name="${prefix}_wheel_joint" type="prismatic">
+    <joint name="${prefix}_finger_joint" type="prismatic">
       <parent link="gripper_base_link"/>
       <child link="${prefix}_finger_link"/>
       <origin xyz="${x} ${y} ${z}" rpy="0 0 0"/>
@@ -38,6 +37,6 @@
     </joint>
   </xacro:macro>
 
-  <xacro:finger prefix="left" x="${}" y="${}" z="${}" direction="-1"/>
-  <xacro:finger prefix="right" x="${}" y="${}" z="${}" direction="1"/>
+  <xacro:finger prefix="left" x="${gripper_finger_length/2}" y="${(gripper_finger_range+(gripper_finger_width/2))-0.01}" z="0" direction="-1"/>
+  <xacro:finger prefix="right" x="${gripper_finger_length/2}" y="${-(gripper_finger_range+(gripper_finger_width/2))-0.01}" z="0" direction="1"/>
 </robot>
