@@ -6,47 +6,73 @@ from sensor_msgs.msg import JointState
 import time
 import struct
 
-# Servo IDs
-servo_ids = {
-    'arm_base_to_long_joint': 1,
-    'arm_long_to_short_joint': 2,
-    'chassis_to_arm_bearing_joint': 3,
-    'left_finger_joint': 4,
-    'arm_base_to_camera_joint': 5
-}
 
-port = serial.Serial('/dev/ttyUSB0', baudrate=1000000, timeout=0.1)
+class SCS15_controller():
+    def __init__(self):
+        # Servo IDs
+        self.servo_ids = {
+            'arm_base_to_long_joint': 1,
+            'arm_long_to_short_joint': 2,
+            'chassis_to_arm_bearing_joint': 3,
+            'left_finger_joint': 4,
+            'arm_base_to_camera_joint': 5
+        }
+        self.port = serial.Serial('/dev/ttyUSB0', baudrate=1000000, timeout=0.1)
 
-def write_servo_position(servo_id, position):
-    # Convert radians to servo value (0-1023 for 300 degrees)
-    value = int((position + 3.14) * (1023 / 6.28))
-    command = struct.pack('<BBBBBB', 0xFF, 0xFF, servo_id, 5, 3, value & 0xFF) + struct.pack('<B', (value >> 8) & 0xFF)
-    checksum = (~sum(command[2:]) & 0xFF)
-    port.write(command + struct.pack('<B', checksum))
+    def calculate_checksum(packet):
+        return (~sum(packet[2:]) & 0xFF)
 
-def handle_joint_command(msg):
-    for i, name in enumerate(msg.joint_names):
-        position = msg.points[0].positions[i]
-        if name in servo_ids:
-            write_servo_position(servo_ids[name], position)
+    def write_servo_position(self, servo_id, position):
+        # Convert radians to servo value (0-1023 for 300 degrees)
+        value = int((position + 3.14) * (1023 / 6.28))
+        command = struct.pack('<BBBBBB', 0xFF, 0xFF, servo_id, 5, 3, value & 0xFF) + struct.pack('<B', (value >> 8) & 0xFF)
+        checksum = (~sum(command[2:]) & 0xFF)
+        self.port.write(command + struct.pack('<B', checksum))
 
-def publish_joint_states():
-    pub = rospy.Publisher('joint_states', JointState, queue_size=10)
-    rate = rospy.Rate(10)
+    def read_servo_position(self, ser, servo_id):
+        # Build Read Position Packet
+        command = [0xFF, 0xFF, servo_id, 0x04, 0x02, 0x2A, 0x02]
+        checksum = self.calculate_checksum(command)
+        command.append(checksum)
 
-    while not rospy.is_shutdown():
-        joint_msg = JointState()
-        joint_msg.header.stamp = rospy.Time.now()
-        joint_msg.name = list(servo_ids.keys())
-        joint_msg.position = []
+        # Send Command
+        ser.write(bytearray(command))
 
-        for servo_id in servo_ids.values():
-            # Read servo position (simulated by incrementing values)
-            pos = (servo_id * 0.1) % 3.14
-            joint_msg.position.append(pos)
+        # Read Response
+        response = ser.read(8)
+        if len(response) < 8:
+            rospy.logwarn(f"No response from servo {servo_id}")
+            return None
 
-        pub.publish(joint_msg)
-        rate.sleep()
+        # Parse Response
+        _, _, id, length, error, pos_low, pos_high, _ = struct.unpack('<BBBBBBB', response)
+        position = (pos_high << 8) + pos_low
+        return position * (3.14159 / 1023.0) - 3.14159  # Scale to radians
+
+    def handle_joint_command(self, msg):
+        for i, name in enumerate(msg.joint_names):
+            position = msg.points[0].positions[i]
+            if name in self.servo_ids:
+                self.write_servo_position(self.servo_ids[name], position)
+
+    def publish_joint_states(self):
+        pub = rospy.Publisher('joint_states', JointState, queue_size=10)
+        rate = rospy.Rate(10)
+
+        while not rospy.is_shutdown():
+            joint_msg = JointState()
+            joint_msg.header.stamp = rospy.Time.now()
+            joint_msg.name = list(self.servo_ids.keys())
+            joint_msg.position = []
+
+            for servo_id in self.servo_ids.values():
+                pos = self.read_servo_position(self.port, servo_id)
+                joint_msg.position.append(pos)
+
+            pub.publish(joint_msg)
+            rate.sleep()
+        
+        self.port.close()
 
 if __name__ == '__main__':
     rospy.init_node('scs15_controller')
