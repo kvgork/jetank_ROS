@@ -2,7 +2,7 @@
 
 import os
 import numpy as np 
-from servo_control import ServoControl
+from servo_control_new import ServoControl
 
 
 class Arm:

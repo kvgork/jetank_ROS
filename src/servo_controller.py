@@ -1,14 +1,16 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import serial
 import rospy
-from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+from trajectory_msgs.msg import JointTrajectory
 from sensor_msgs.msg import JointState
-import time
 import struct
 
 
+#REwrite to port handler
+
 class SCS15_controller():
     def __init__(self):
+        rospy.init_node('scs15_controller')
         # Servo IDs
         self.servo_ids = {
             'arm_base_to_long_joint': 1,
@@ -17,9 +19,10 @@ class SCS15_controller():
             'left_finger_joint': 4,
             'arm_base_to_camera_joint': 5
         }
-        self.port = serial.Serial('/dev/ttyUSB0', baudrate=1000000, timeout=0.1)
+        self.port = serial.Serial('/dev/ttyTHS1', baudrate=1000000, timeout=0.1)
+        rospy.Subscriber('/arm_controller/command', JointTrajectory, self.handle_joint_command)
 
-    def calculate_checksum(packet):
+    def calculate_checksum(self, packet):
         return (~sum(packet[2:]) & 0xFF)
 
     def write_servo_position(self, servo_id, position):
@@ -34,12 +37,13 @@ class SCS15_controller():
         command = [0xFF, 0xFF, servo_id, 0x04, 0x02, 0x2A, 0x02]
         checksum = self.calculate_checksum(command)
         command.append(checksum)
-
+        print(f"Command sent: {command}")
         # Send Command
         ser.write(bytearray(command))
 
         # Read Response
         response = ser.read(8)
+        print(f"Raw response: {response} (length: {len(response)})")
         if len(response) < 8:
             rospy.logwarn(f"No response from servo {servo_id}")
             return None
@@ -56,6 +60,7 @@ class SCS15_controller():
                 self.write_servo_position(self.servo_ids[name], position)
 
     def publish_joint_states(self):
+        # rospy.init_node('joint_state_publisher')
         pub = rospy.Publisher('joint_states', JointState, queue_size=10)
         rate = rospy.Rate(10)
 
@@ -75,6 +80,5 @@ class SCS15_controller():
         self.port.close()
 
 if __name__ == '__main__':
-    rospy.init_node('scs15_controller')
-    rospy.Subscriber('/arm_controller/command', JointTrajectory, handle_joint_command)
-    publish_joint_states()
+    Controller = SCS15_controller()
+    Controller.publish_joint_states()

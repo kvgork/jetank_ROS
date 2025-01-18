@@ -104,7 +104,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES robot_main
+  LIBRARIES robot_main
 #  CATKIN_DEPENDS gazebo roscpp rospy std_msgs
 #  DEPENDS system_lib
 )
