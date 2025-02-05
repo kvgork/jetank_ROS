@@ -67,7 +67,7 @@ class ServoControl:
             'arm_base_to_camera_joint': 5
         }
         self.pub = rospy.Publisher('joint_states', JointState, queue_size=10)
-        # self.joint_sub = rospy.Subscriber("/joint_trajectory", JointTrajectory, self.joint_callback)
+        self.joint_sub = rospy.Subscriber("/joint_trajectory", JointTrajectory, self.joint_callback)
 
         if os.name == 'nt':
             import msvcrt
@@ -109,6 +109,7 @@ class ServoControl:
         else:
             print("Failed to open the port")
             print("Press any key to terminate...")
+            rospy.logerr("Failed to open serial port")
             getch()
             quit()
 
@@ -119,6 +120,7 @@ class ServoControl:
         else:
             print("Failed to change the baudrate")
             print("Press any key to terminate...")
+            rospy.logerr("Failed to set baud rate")
             getch()
             quit()
 
@@ -175,14 +177,23 @@ class ServoControl:
 
     def nowPosUpdate(self, servoNumInput):
         # Get position
-        scs_present_position_speed, scs_comm_result, scs_error = self.packetHandler.read4ByteTxRx(self.portHandler, servoNumInput, self.ADDR_SCS_PRESENT_POSITION)
-        scs_present_position = SCS_LOWORD(scs_present_position_speed)
-        
-        self.nowPos[servoNumInput] = scs_present_position
-        # print(scs_present_position)
-        return scs_present_position
+        try:
+            scs_present_position_speed, scs_comm_result, scs_error = self.packetHandler.read4ByteTxRx(
+                self.portHandler, servoNumInput, self.ADDR_SCS_PRESENT_POSITION
+            )
+            if scs_comm_result != COMM_SUCCESS:
+                rospy.logwarn(f"Communication failure with servo {servoNumInput}: {self.packetHandler.getTxRxResult(scs_comm_result)}")
+                return None
+            if scs_error:
+                rospy.logwarn(f"Servo {servoNumInput} returned error: {self.packetHandler.getRxPacketError(scs_error)}")
+                return None
+            scs_present_position = SCS_LOWORD(scs_present_position_speed)
+            self.nowPos[servoNumInput] = scs_present_position
+            return scs_present_position
+        except Exception as e:
+            rospy.logerr(f"Failed to read position from servo {servoNumInput}: {e}")
+            return None
     
-    ## ADD update joint state function
     def updateJointStates(self):
         joint_msg = JointState()
         joint_msg.header.stamp = rospy.Time.now()
@@ -195,10 +206,10 @@ class ServoControl:
 
         self.pub.publish(joint_msg)
 
-    # def joint_callback(self, msg):
-    #     for point in msg.points:
-    #         joint_positions = point.positions  # Get target joint positions
-    #         self.servo_driver.move_to_positions(joint_positions)
+    def joint_callback(self, msg):
+        for point in msg.points:
+            joint_positions = point.positions  # Get target joint positions
+            self.servo_driver.move_to_positions(joint_positions)
 
     def servoStop(self, servoNum):
         # Stop servo command

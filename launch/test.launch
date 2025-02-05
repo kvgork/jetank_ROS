@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-  <node pkg="robot_main" type="servo_control_new.py" name="servo_controller" output="screen">
+  <node pkg="robot_main" type="servo_control_v3.py" name="servo_controller" output="screen">
 
   </node>
 
