@@ -57,11 +57,10 @@ class StereoCamera(SingletonConfigurable):
 
             self.left_value = left_image
             self.right_value = right_image
-            self.start()
-        except:
-            self.stop()
-            raise RuntimeError(
-                'Could not initialize cameras.  Please see error trace.')
+
+        except Exception as e:
+            rospy.logerr(f"Camera initialization failed: {e}")
+
 
         atexit.register(self.stop)
 
@@ -78,7 +77,7 @@ class StereoCamera(SingletonConfigurable):
         if not self.left_cap.isOpened():
             self.left_cap.open(self._gst_str(sensor_id=self.left_sensor_id), cv2.CAP_GSTREAMER)
         if not self.right_cap.isOpened():
-            self.tight_cap.open(self._gst_str(sensor_id=self.right_sensor_id), cv2.CAP_GSTREAMER)
+            self.right_cap.open(self._gst_str(sensor_id=self.right_sensor_id), cv2.CAP_GSTREAMER)
 
         while not rospy.is_shutdown():
             left_re, left_image = self.left_cap.read()
@@ -90,7 +89,8 @@ class StereoCamera(SingletonConfigurable):
                 rospy.loginfo("Published stereo camera frames.")
             else:
                 rospy.logwarn("Failed to capture frames from both cameras.")
-            
+                continue
+
             self.rate.sleep()
 
     def stop(self):
@@ -102,7 +102,7 @@ class StereoCamera(SingletonConfigurable):
     def restart(self):
         self.stop()
         self.start()
-    
+
     def frame_to_ros_image(self, frame, side):
         ros_image = Image()
         ros_image.header.stamp = rospy.Time.now()
@@ -115,7 +115,8 @@ class StereoCamera(SingletonConfigurable):
         return ros_image
 
 if __name__ == '__main__':
+    Camera = StereoCamera()
     try:
-        StereoCamera()
+        Camera.start()
     except rospy.ROSInterruptException:
         pass
