@@ -101,7 +101,7 @@ class CameraCalibration():
         print("Q Matrix:\n", Q)
 
 if __name__ == '__main__':
-    calib_camera = CameraCalibration(6,6)
+    calib_camera = CameraCalibration(9,7)
     try:
         calib_camera.take_pictures()
     except:
