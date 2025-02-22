@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-  <node pkg="robot_main" type="camera_v2.py" name="servo_controller" output="screen">
+  <node pkg="robot_main" type="camera_v2.py" name="test" output="screen">
 
   </node>
 

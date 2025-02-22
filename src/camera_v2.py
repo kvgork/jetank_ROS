@@ -14,7 +14,7 @@ class StereoCamera(SingletonConfigurable):
     # Camera properties
     width = traitlets.Integer(default_value=640).tag(config=True)   # Reduce for performance
     height = traitlets.Integer(default_value=480).tag(config=True)
-    fps = traitlets.Integer(default_value=15).tag(config=True)      # Lower FPS if needed
+    fps = traitlets.Integer(default_value=60).tag(config=True)      # Lower FPS if needed
     left_sensor_id = traitlets.Integer(default_value=0).tag(config=True)
     right_sensor_id = traitlets.Integer(default_value=1).tag(config=True)
 
@@ -30,7 +30,7 @@ class StereoCamera(SingletonConfigurable):
         self.point_cloud_pub = rospy.Publisher('/camera/depth/points', PointCloud2, queue_size=10)
 
         self.bridge = CvBridge()
-        self.rate = rospy.Rate(10)  # 10 Hz
+        self.rate = rospy.Rate(100)  # 10 Hz
 
         # Open cameras using GStreamer
         self.left_cap = cv2.VideoCapture(self._gst_str(sensor_id=self.left_sensor_id), cv2.CAP_GSTREAMER)

@@ -1,22 +1,44 @@
+#!/usr/bin/env python3
+import traitlets
+from traitlets.config.configurable import SingletonConfigurable
 import cv2
 import os
 import numpy as np
 import glob
+import keyboard
 
-class CameraCalibration():
-    def __init__(self, checkerboard_x, checkerboard_y):
+class CameraCalibration(SingletonConfigurable):
+
+    # Camera properties
+    width = traitlets.Integer(default_value=1920).tag(config=True)   # Reduce for performance
+    height = traitlets.Integer(default_value=1080).tag(config=True)
+    fps = traitlets.Integer(default_value=5).tag(config=True)      # Lower FPS if needed
+    left_sensor_id = traitlets.Integer(default_value=0).tag(config=True)
+    right_sensor_id = traitlets.Integer(default_value=1).tag(config=True)
+
+    def __init__(self, checkerboard_x, checkerboard_y, *args, **kwargs):
+        super(CameraCalibration, self).__init__(*args, **kwargs)
         self.CHECKERBOARD= [checkerboard_x , checkerboard_y]
+        # # Initialize ROS node
+        # rospy.init_node('camera_calibration', anonymous=True)
+
+        # self.bridge = CvBridge()
+        # self.rate = rospy.Rate(10)  # 10 Hz
     
     def take_pictures(self):
         # Chessboard size (number of inner corners per row and column)
-        CHECKERBOARD = (9, 6)  # Adjust based on your actual checkerboard
         image_dir = "calibration_images"
         os.makedirs(image_dir, exist_ok=True)
 
         # Initialize video capture for both cameras
-        cap_left = cv2.VideoCapture(0)  # Left camera index
-        cap_right = cv2.VideoCapture(1)  # Right camera index
+        cap_left = cv2.VideoCapture(self._gst_str(sensor_id=self.left_sensor_id), cv2.CAP_GSTREAMER)  # Left camera index
+        cap_right = cv2.VideoCapture(self._gst_str(sensor_id=self.right_sensor_id), cv2.CAP_GSTREAMER)  # Right camera index
 
+        # Ensure cameras opened
+        if not cap_left.isOpened() or not cap_right.isOpened():
+            raise RuntimeError('Could not open cameras. Check camera connections.')
+
+        print("Press 's' to save an image, press 'q' to continue. Try to get about 12 images.")
         frame_count = 0
         while True:
             retL, frameL = cap_left.read()
@@ -26,16 +48,29 @@ class CameraCalibration():
                 print("Failed to capture images.")
                 break
 
-            cv2.imshow("Left Camera", frameL)
-            cv2.imshow("Right Camera", frameR)
+            # Check if frames are valid
+            if frameL is None or frameR is None:
+                print("Error: Captured frames are None. Check the camera connection.")
+                break
 
-            key = cv2.waitKey(1)
-            if key == ord("s"):  # Press 's' to save images
-                cv2.imwrite(f"{image_dir}/left_{frame_count}.png", frameL)
-                cv2.imwrite(f"{image_dir}/right_{frame_count}.png", frameR)
-                print(f"Saved pair {frame_count}")
+            print(f"Frames captured successfully: Left shape {frameL.shape}, Right shape {frameR.shape}")
+		
+            combined_frame = cv2.hconcat([frameL, frameR])
+            cv2.imshow("Stereo camera", combined_frame)
+
+            key = input("Press 's' to save, 'q' to quit: ")
+            if key == 's':  # Press 's' to save images
+                left_filename = f"{image_dir}/left_{frame_count}.png"
+                right_filename = f"{image_dir}/right_{frame_count}.png"
+
+                try:
+                    cv2.imwrite(left_filename, frameL)
+                    cv2.imwrite(right_filename, frameR)
+                    print(f"Saved pair {frame_count}: {left_filename}, {right_filename}")
+                except Exception as e:
+                    print(f"Error saving images: {e}")
                 frame_count += 1
-            elif key == ord("q"):  # Press 'q' to quit
+            elif key == 'q':  # Press 'q' to continue
                 break
 
         cap_left.release()
@@ -45,6 +80,7 @@ class CameraCalibration():
         self.find_corners()
     
     def find_corners(self):
+        print("Starting corner detection")
 
         # Termination criteria for corner refinement
         self.criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
@@ -64,14 +100,14 @@ class CameraCalibration():
             self.imgL_gray = cv2.imread(imgL, cv2.IMREAD_GRAYSCALE)
             self.imgR_gray = cv2.imread(imgR, cv2.IMREAD_GRAYSCALE)
 
-            retL, cornersL = cv2.findChessboardCorners(self.imgL_gray, CHECKERBOARD, None)
-            retR, cornersR = cv2.findChessboardCorners(self.imgR_gray, CHECKERBOARD, None)
+            retL, cornersL = cv2.findChessboardCorners(self.imgL_gray, (self.CHECKERBOARD[0], self.CHECKERBOARD[1]), None)
+            retR, cornersR = cv2.findChessboardCorners(self.imgR_gray, (self.CHECKERBOARD[0], self.CHECKERBOARD[1]), None)
 
             if retL and retR:
                 self.objpoints.append(objp)
 
-                cornersL = cv2.cornerSubPix(self.imgL_gray, cornersL, (11, 11), (-1, -1), criteria)
-                cornersR = cv2.cornerSubPix(self.imgR_gray, cornersR, (11, 11), (-1, -1), criteria)
+                cornersL = cv2.cornerSubPix(self.imgL_gray, cornersL, (11, 11), (-1, -1), self.criteria)
+                cornersR = cv2.cornerSubPix(self.imgR_gray, cornersR, (11, 11), (-1, -1), self.criteria)
 
                 self.imgpointsL.append(cornersL)
                 self.imgpointsR.append(cornersR)
@@ -99,11 +135,22 @@ class CameraCalibration():
         )
 
         print("Q Matrix:\n", Q)
+    
+    def _gst_str(self, sensor_id):
+        """GStreamer pipeline for Jetson Nano"""
+        return (
+            "nvarguscamerasrc sensor-id={} ! video/x-raw(memory:NVMM), width={}, height={}, "
+            "format=(string)NV12, framerate={}/1 ! nvvidconv ! video/x-raw, "
+            "width={}, height={}, format=(string)BGRx ! videoconvert ! appsink"
+            .format(sensor_id, self.width, self.height, self.fps, self.width, self.height)
+        )
 
 if __name__ == '__main__':
     calib_camera = CameraCalibration(9,7)
-    try:
-        calib_camera.take_pictures()
-    except:
-        print("Calibration failed")
+    calib_camera.take_pictures()
+    # calib_camera.find_corners()
+    # try:
+    #     calib_camera.find_corners()
+    # except:
+    #     print("Calibration failed")
 
