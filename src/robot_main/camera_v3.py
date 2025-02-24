@@ -33,7 +33,6 @@ class StereoCamera(SingletonConfigurable):
         self.right_image_pub = rospy.Publisher('/camera/right/image_raw', Image, queue_size=10)
         self.point_cloud_pub = rospy.Publisher('/camera/depth/points', PointCloud2, queue_size=10)
 
-        self.bridge = CvBridge()
         self.rate = rospy.Rate(30)  # 10 Hz
 
         # Open cameras using GStreamer
@@ -59,25 +58,25 @@ class StereoCamera(SingletonConfigurable):
         self.left_thread = threading.Thread(target=self.capture_left)
         self.right_thread = threading.Thread(target=self.capture_right)
 
-        self.point_cloud_thread = threading.Thread(target=self.generate_point_cloud)
+        # self.point_cloud_thread = threading.Thread(target=self.generate_point_cloud)
 
         self.left_thread.start()
         self.right_thread.start()
-        self.point_cloud_thread.start()
+        # self.point_cloud_thread.start()
 
-        while not rospy.is_shutdown():
-            try:
-                # Generate and publish point cloud
-                self.generate_point_cloud(self.left_image_raw, self.left_image_raw)
-            except:
-                rospy.logwarn("Failed to create point cloud.")
-            self.rate.sleep()
+        # while not rospy.is_shutdown():
+        #     try:
+        #         # Generate and publish point cloud
+        #         self.generate_point_cloud(self.left_image_raw, self.left_image_raw)
+        #     except:
+        #         rospy.logwarn("Failed to create point cloud.")
+        #     self.rate.sleep()
 
     def capture_left(self):
         while not rospy.is_shutdown():
             left_re, left_image = self.left_cap.read()
             if left_re:
-                self.left_image_raw = self.frame_to_ros_image(left_image, "left")
+                self.left_image_raw = self.frame_to_ros_image(cv2.flip(left_image, -1), "left")
                 self.left_image_pub.publish(self.left_image_raw)
             else:
                 rospy.logwarn("Failed to capture left frames.")
@@ -86,8 +85,8 @@ class StereoCamera(SingletonConfigurable):
         while not rospy.is_shutdown():
             right_re, right_image = self.right_cap.read()
             if right_re:
-                self.right_image_raw = self.frame_to_ros_image(right_image, "right")
-                self.right_image_pub.publish(self.left_image_raw)
+                self.right_image_raw = self.frame_to_ros_image(cv2.flip(right_image, -1), "right")
+                self.right_image_pub.publish(self.right_image_raw)
             else:
                 rospy.logwarn("Failed to capture left frames.")
 
