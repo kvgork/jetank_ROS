@@ -26,6 +26,7 @@ class CameraCalibration:
         # Synchronize the image messages
         self.sync = ApproximateTimeSynchronizer([self.left_image_sub, self.right_image_sub], queue_size=10, slop=0.1)
         self.sync.registerCallback(self.image_callback)
+        self.take_pictures()
 
     def image_callback(self, left_msg, right_msg):
         # Convert ROS Image messages to OpenCV format
@@ -43,8 +44,8 @@ class CameraCalibration:
 
                 print(f"Frames captured successfully: Left shape {left_img.shape}, Right shape {right_img.shape}")
             
-                combined_frame = cv2.hconcat([left_img, right_img])
-                cv2.imshow("Stereo camera", combined_frame)
+                #combined_frame = cv2.hconcat([left_img, right_img])
+                #cv2.imshow("Stereo camera", combined_frame)
 
                 key = input("Press 's' to save, ' ' to skip, 'q' to quit: ")
                 if key == 's':  # Press 's' to save images
