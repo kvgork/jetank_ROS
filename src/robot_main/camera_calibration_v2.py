@@ -129,7 +129,7 @@ class CameraCalibration:
 
         print("Q Matrix:\n", Q)
 
-    def ros_image_to_frame(ros_image):
+    def ros_image_to_frame(self, ros_image):
         # Get image height, width, and encoding type
         height = ros_image.height
         width = ros_image.width
