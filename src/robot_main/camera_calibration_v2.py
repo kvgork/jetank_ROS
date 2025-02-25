@@ -132,7 +132,7 @@ class CameraCalibration:
 
 if __name__ == "__main__":
     try:
-        CameraCalibration()
+        CameraCalibration(9,7)
         rospy.spin()
     except rospy.ROSInterruptException:
         pass
