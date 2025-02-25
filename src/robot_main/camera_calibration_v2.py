@@ -29,8 +29,8 @@ class CameraCalibration:
 
     def image_callback(self, left_msg, right_msg):
         # Convert ROS Image messages to OpenCV format
-        left_img = self.bridge.imgmsg_to_cv2(left_msg, "bgr8")
-        right_img = self.bridge.imgmsg_to_cv2(right_msg, "bgr8")
+        left_img = self.ros_image_to_frame(left_msg)
+        right_img = self.ros_image_to_frame(right_msg)
 
         self.left_image = left_img
         self.right_image = right_img
@@ -128,6 +128,25 @@ class CameraCalibration:
         )
 
         print("Q Matrix:\n", Q)
+
+    def ros_image_to_frame(ros_image):
+        # Get image height, width, and encoding type
+        height = ros_image.height
+        width = ros_image.width
+        encoding = ros_image.encoding
+
+        # Check encoding type (assuming "bgr8" or "rgb8" for this example)
+        if encoding == "bgr8" or encoding == "rgb8":
+            # Convert the raw byte data to a numpy array
+            # The 'step' field represents the row width in bytes (width * number of channels)
+            frame = np.frombuffer(ros_image.data, dtype=np.uint8).reshape((height, width, 3))
+        elif encoding == "mono8":
+            # Grayscale images (single channel)
+            frame = np.frombuffer(ros_image.data, dtype=np.uint8).reshape((height, width))
+        else:
+            raise ValueError(f"Unsupported encoding: {encoding}")
+
+        return frame
         
 
 if __name__ == "__main__":
