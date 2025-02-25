@@ -6,7 +6,6 @@ import os
 import glob
 
 from cv_bridge import CvBridge
-from robot_main.camera_v3 import StereoCamera
 from sensor_msgs.msg import Image
 from message_filters import ApproximateTimeSynchronizer, Subscriber
 
@@ -18,8 +17,6 @@ class CameraCalibration:
         os.makedirs(self.image_dir, exist_ok=True)
 
         rospy.init_node("camera_calibration_node")
-        Stereo_camera = StereoCamera()
-        StereoCamera.start()
 
         self.bridge = CvBridge()
 
@@ -27,7 +24,7 @@ class CameraCalibration:
         self.right_image_sub = Subscriber('/camera/right/image_raw', Image)
 
         # Synchronize the image messages
-        self.sync = ApproximateTimeSynchronizer([self.left_sub, self.right_sub], queue_size=10, slop=0.1)
+        self.sync = ApproximateTimeSynchronizer([self.left_image_sub, self.right_image_sub], queue_size=10, slop=0.1)
         self.sync.registerCallback(self.image_callback)
 
     def image_callback(self, left_msg, right_msg):
