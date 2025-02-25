@@ -13,9 +13,9 @@ import threading
 class StereoCamera(SingletonConfigurable):
     
     # Camera properties
-    width = traitlets.Integer(default_value=640).tag(config=True)   # Reduce for performance
-    height = traitlets.Integer(default_value=480).tag(config=True)
-    fps = traitlets.Integer(default_value=30).tag(config=True)      # Lower FPS if needed
+    width = traitlets.Integer(default_value=1280).tag(config=True)   # Reduce for performance
+    height = traitlets.Integer(default_value=800).tag(config=True)
+    fps = traitlets.Integer(default_value=20).tag(config=True)      # Lower FPS if needed
     left_sensor_id = traitlets.Integer(default_value=0).tag(config=True)
     right_sensor_id = traitlets.Integer(default_value=1).tag(config=True)
 

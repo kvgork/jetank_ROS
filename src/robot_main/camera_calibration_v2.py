@@ -37,6 +37,7 @@ class CameraCalibration:
         self.right_image = right_img
 
     def take_pictures(self):
+        frame_count = 0
         while True:
             try:
                 left_img = self.left_image
