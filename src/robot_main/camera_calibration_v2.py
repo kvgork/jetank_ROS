@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import os
 import glob
+import keyboard
 
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
@@ -48,8 +49,9 @@ class CameraCalibration:
                 #combined_frame = cv2.hconcat([left_img, right_img])
                 #cv2.imshow("Stereo camera", combined_frame)
 
-                key = input("Press 's' to save, ' ' to skip, 'q' to quit: ")
-                if key == 's':  # Press 's' to save images
+                # key = input("Press 's' to save, ' ' to skip, 'q' to quit: ")
+                # if key == 's':  # Press 's' to save images
+                if keyboard.is_pressed('s'):
                     left_filename = f"{self.image_dir}/left_{frame_count}.png"
                     right_filename = f"{self.image_dir}/right_{frame_count}.png"
 
@@ -60,13 +62,15 @@ class CameraCalibration:
                     except Exception as e:
                         print(f"Error saving images: {e}")
                     frame_count += 1
-                elif key == ' ':
+                # elif key == ' ':
+                elif keyboard.is_pressed(' '):
                     pass
                 
-                elif key == 'q':  # Press 'q' to continue
+                # elif key == 'q':  # Press 'q' to continue
+                elif keyboard.is_pressed('q'):
                     break
 
-                rospy.loginfo("Published point cloud.")
+                # rospy.loginfo("Published point cloud.")
 
             except Exception as e:
                 rospy.logerr(f"Error processing stereo images: {e}")
