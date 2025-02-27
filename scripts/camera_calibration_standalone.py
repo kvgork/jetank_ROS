@@ -1,52 +1,86 @@
 #!/usr/bin/env python3
-import rospy
+import traitlets
+from traitlets.config.configurable import SingletonConfigurable
+import atexit
 import cv2
 import numpy as np
-import os
-import glob
+import rospy
+import threading
 
-from cv_bridge import CvBridge
-from sensor_msgs.msg import Image
-from message_filters import ApproximateTimeSynchronizer, Subscriber
+class CameraCalibrationStandalone(SingletonConfigurable):
+    
+    # Camera properties
+    width = traitlets.Integer(default_value=1280).tag(config=True)   # Reduce for performance
+    height = traitlets.Integer(default_value=800).tag(config=True)
+    fps = traitlets.Integer(default_value=20).tag(config=True)      # Lower FPS if needed
+    left_sensor_id = traitlets.Integer(default_value=0).tag(config=True)
+    right_sensor_id = traitlets.Integer(default_value=1).tag(config=True)
 
-class CameraCalibration:
+    def __init__(self, *args, **kwargs):
+        super(CameraCalibrationStandalone, self).__init__(*args, **kwargs)
 
-    def __init__(self, checkerboard_x, checkerboard_y):
-        self.CHECKERBOARD= [checkerboard_x , checkerboard_y]
-        self.image_dir = "calibration_images"
-        os.makedirs(self.image_dir, exist_ok=True)
+        # Open cameras using GStreamer
+        self.left_cap = cv2.VideoCapture(self._gst_str(sensor_id=self.left_sensor_id), cv2.CAP_GSTREAMER)
+        self.right_cap = cv2.VideoCapture(self._gst_str(sensor_id=self.right_sensor_id), cv2.CAP_GSTREAMER)
 
-        rospy.init_node("camera_calibration_node")
+        # Ensure cameras opened
+        if not self.left_cap.isOpened() or not self.right_cap.isOpened():
+            raise RuntimeError('Could not open cameras. Check camera connections.')
 
-        self.bridge = CvBridge()
+        atexit.register(self.stop)
 
-        self.left_image_sub = Subscriber('/camera/left/image_raw', Image)
-        self.right_image_sub = Subscriber('/camera/right/image_raw', Image)
+    def _gst_str(self, sensor_id):
+        """GStreamer pipeline for Jetson Nano"""
+        return (
+            "nvarguscamerasrc sensor-id={} ! video/x-raw(memory:NVMM), width={}, height={}, "
+            "format=(string)NV12, framerate={}/1 ! nvvidconv ! video/x-raw, "
+            "width={}, height={}, format=(string)BGRx ! videoconvert ! appsink"
+            .format(sensor_id, self.width, self.height, self.fps, self.width, self.height)
+        )
 
-        # Synchronize the image messages
-        self.sync = ApproximateTimeSynchronizer([self.left_image_sub, self.right_image_sub], queue_size=10, slop=0.1)
-        self.sync.registerCallback(self.image_callback)
+    def start(self):
+        self.left_thread = threading.Thread(target=self.capture_left)
+        self.right_thread = threading.Thread(target=self.capture_right)
+
+        # self.point_cloud_thread = threading.Thread(target=self.generate_point_cloud)
+
+        self.left_thread.start()
+        self.right_thread.start()
+
         self.take_pictures()
 
-    def image_callback(self, left_msg, right_msg):
-        # Convert ROS Image messages to OpenCV format
-        left_img = self.ros_image_to_frame(left_msg)
-        right_img = self.ros_image_to_frame(right_msg)
 
-        self.left_image = left_img
-        self.right_image = right_img
+    def capture_left(self):
+        while not rospy.is_shutdown():
+            left_re, left_image = self.left_cap.read()
+            if left_re:
+                self.left_image_raw = cv2.flip(left_image, -1)
+            else:
+                rospy.logwarn("Failed to capture left frames.")
+
+    def capture_right(self):
+        while not rospy.is_shutdown():
+            right_re, right_image = self.right_cap.read()
+            if right_re:
+                self.right_image_raw = cv2.flip(right_image, -1)
+            else:
+                rospy.logwarn("Failed to capture left frames.")
+
+    def stop(self):
+        self.left_cap.release()
+        self.right_cap.release()
 
     def take_pictures(self):
         frame_count = 0
         while True:
             try:
-                left_img = self.left_image
-                right_img = self.right_image
+                left_img = self.left_image_raw
+                right_img = self.right_image_raw
 
                 print(f"Frames captured successfully: Left shape {left_img.shape}, Right shape {right_img.shape}")
             
-                #combined_frame = cv2.hconcat([left_img, right_img])
-                #cv2.imshow("Stereo camera", combined_frame)
+                combined_frame = cv2.hconcat([left_img, right_img])
+                cv2.imshow("Stereo camera", combined_frame)
 
                 key = input("Press 's' to save, ' ' to skip, 'q' to quit: ")
                 if key == 's':  # Press 's' to save images
@@ -131,29 +165,10 @@ class CameraCalibration:
 
         print("Q Matrix:\n", Q)
 
-    def ros_image_to_frame(self, ros_image):
-        # Get image height, width, and encoding type
-        height = ros_image.height
-        width = ros_image.width
-        encoding = ros_image.encoding
 
-        # Check encoding type (assuming "bgr8" or "rgb8" for this example)
-        if encoding == "bgr8" or encoding == "rgb8":
-            # Convert the raw byte data to a numpy array
-            # The 'step' field represents the row width in bytes (width * number of channels)
-            frame = np.frombuffer(ros_image.data, dtype=np.uint8).reshape((height, width, 3))
-        elif encoding == "mono8":
-            # Grayscale images (single channel)
-            frame = np.frombuffer(ros_image.data, dtype=np.uint8).reshape((height, width))
-        else:
-            raise ValueError(f"Unsupported encoding: {encoding}")
-
-        return frame
-        
-
-if __name__ == "__main__":
+if __name__ == '__main__':
+    camera = CameraCalibrationStandalone()
     try:
-        CameraCalibration(9,7)
-        rospy.spin()
+        camera.start()
     except rospy.ROSInterruptException:
         pass
