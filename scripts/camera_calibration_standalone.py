@@ -6,6 +6,8 @@ import cv2
 import numpy as np
 import rospy
 import threading
+import glob
+import os
 
 class CameraCalibrationStandalone(SingletonConfigurable):
     
@@ -16,8 +18,12 @@ class CameraCalibrationStandalone(SingletonConfigurable):
     left_sensor_id = traitlets.Integer(default_value=0).tag(config=True)
     right_sensor_id = traitlets.Integer(default_value=1).tag(config=True)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, checkerboard_x, checkerboard_y, *args, **kwargs ):
         super(CameraCalibrationStandalone, self).__init__(*args, **kwargs)
+
+        self.CHECKERBOARD = [checkerboard_x, checkerboard_y]
+        self.image_dir = "calibration_images"
+        os.makedirs(self.image_dir, exist_ok=True)
 
         # Open cameras using GStreamer
         self.left_cap = cv2.VideoCapture(self._gst_str(sensor_id=self.left_sensor_id), cv2.CAP_GSTREAMER)
@@ -79,8 +85,8 @@ class CameraCalibrationStandalone(SingletonConfigurable):
 
                 print(f"Frames captured successfully: Left shape {left_img.shape}, Right shape {right_img.shape}")
             
-                combined_frame = cv2.hconcat([left_img, right_img])
-                cv2.imshow("Stereo camera", combined_frame)
+                # combined_frame = cv2.hconcat([left_img, right_img])
+                # cv2.imshow("Stereo camera", combined_frame)
 
                 key = input("Press 's' to save, ' ' to skip, 'q' to quit: ")
                 if key == 's':  # Press 's' to save images
@@ -127,8 +133,19 @@ class CameraCalibrationStandalone(SingletonConfigurable):
             self.imgL_gray = cv2.imread(imgL, cv2.IMREAD_GRAYSCALE)
             self.imgR_gray = cv2.imread(imgR, cv2.IMREAD_GRAYSCALE)
 
-            retL, cornersL = cv2.findChessboardCorners(self.imgL_gray, (self.CHECKERBOARD[0], self.CHECKERBOARD[1]), None)
-            retR, cornersR = cv2.findChessboardCorners(self.imgR_gray, (self.CHECKERBOARD[0], self.CHECKERBOARD[1]), None)
+            print("Left image")
+            print(self.imgL_gray)
+            print("Right image")
+            print(self.imgR_gray)
+
+            retL, cornersL = cv2.findChessboardCornersSB(self.imgL_gray, (self.CHECKERBOARD[0], self.CHECKERBOARD[1]), flags=cv2.CALIB_CB_EXHAUSTIVE)
+            retR, cornersR = cv2.findChessboardCornersSB(self.imgR_gray, (self.CHECKERBOARD[0], self.CHECKERBOARD[1]), flags=cv2.CALIB_CB_EXHAUSTIVE)
+
+            print(retL)
+            print(cornersL)
+
+            print(retR)
+            print(cornersR)
 
             if retL and retR:
                 self.objpoints.append(objp)
@@ -167,7 +184,7 @@ class CameraCalibrationStandalone(SingletonConfigurable):
 
 
 if __name__ == '__main__':
-    camera = CameraCalibrationStandalone()
+    camera = CameraCalibrationStandalone(5,5)
     try:
         camera.start()
     except rospy.ROSInterruptException:

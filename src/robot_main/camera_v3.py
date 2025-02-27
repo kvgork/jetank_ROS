@@ -123,10 +123,23 @@ class StereoCamera(SingletonConfigurable):
             disparity = stereo.compute(left_gray, right_gray).astype(np.float32) / 16.0  # Normalize
 
             # Q matrix (adjust for your camera calibration)
-            Q = np.array([[1, 0, 0, -self.width / 2],
-                        [0, -1, 0, self.height / 2],
-                        [0, 0, 0, -1],  # -fx (focal length)
-                        [0, 0, 1, 0]])
+            # Q = np.array([[1, 0, 0, -self.width / 2],
+            #             [0, -1, 0, self.height / 2],
+            #             [0, 0, 0, -1],  # -fx (focal length)
+            #             [0, 0, 1, 0]])
+            # Rotation Matrix (R):
+            #  [[ 0.29067159  0.81833769 -0.49581594]
+            #  [-0.83874244  0.46729337  0.27954967]
+            #  [ 0.46045754  0.33460473  0.82220346]]
+            # Translation Vector (T):
+            #  [[  29.5460139 ]
+            #  [ -17.19465882]
+            #  [ 101.6210461 ]]
+
+            Q = np.array([[  1.00000000e+00,   0.00000000e+00,   0.00000000e+00,   1.40628038e+04],
+                [  0.00000000e+00,   1.00000000e+00,   0.00000000e+00,   3.16940834e+02],
+                [  0.00000000e+00,   0.00000000e+00,   0.00000000e+00,   2.05850226e+04],
+                [  0.00000000e+00,   0.00000000e+00,  -9.32688921e-03,   0.00000000e+00]])
 
             # Convert disparity to 3D points
             points_3D = cv2.reprojectImageTo3D(disparity, Q)
