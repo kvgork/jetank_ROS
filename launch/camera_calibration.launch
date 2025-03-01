@@ -4,7 +4,7 @@
 
   </node>
 
-  <node pkg="robot_main" type="camera_calibration_v2.py" name="test" output="screen">
+  <node pkg="robot_main" type="camera_calibration.py" name="stereo_camera_calibrator" output="screen">
 
   </node>
 
