@@ -17,7 +17,7 @@ class StereoCameraCalibrator:
         rospy.init_node('stereo_camera_calibrator', anonymous=True)
         
         # Parameters
-        self.chessboard_size = rospy.get_param('~chessboard_size', (5, 5))  # Interior points on chessboard
+        self.chessboard_size = rospy.get_param('~chessboard_size', (8, 6))  # Interior points on chessboard
         self.square_size = rospy.get_param('~square_size', 0.025)  # Size of chessboard square in meters
         self.num_samples = rospy.get_param('~num_samples', 20)  # Number of sample pairs to collect
         self.save_path = rospy.get_param('~save_path', 'calibration_images')
