@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+  <node pkg="robot_main" type="camera_v3.py" name="camera_node" output="screen">
+
+  </node>
+
+  <node pkg="robot_main" type="camera_calibration.py" name="stereo_camera_calibrator" output="screen">
+    <param name="~save_path" value="$(find robot_main)/log/calibration_images" />
+  </node>
+
+</launch>
