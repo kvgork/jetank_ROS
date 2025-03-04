@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 
 from cv_bridge import CvBridge
-from robot_main.camera_v3 import StereoCamera
+from robot_main.camera.camera import StereoCamera
 from sensor_msgs.msg import Image, PointCloud2, PointField
 import sensor_msgs.point_cloud2 as pc2
 from message_filters import ApproximateTimeSynchronizer, Subscriber
