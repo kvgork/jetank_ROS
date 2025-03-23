@@ -11,6 +11,12 @@ This repository provides a complete Robot Operating System (ROS) integration for
 
 I hope to upgrade this project to ROS2 as soon as I get my hands on a Jetson Orin Super Development kit. Then I also want to try to create functions using Reinforcement Learning.
 
+This is all work in progress!
+
+## 🛠️ Hardware updates
+
+- **Camera module**: Updated the stock IMX219-160 Camera module to a IMX219-83 Stereo Camera module to allow for depth perception
+
 ## ✨ Key Features
 
 - **Complete ROS Integration**: Full conversion of the JeTank platform to ROS architecture
@@ -22,8 +28,6 @@ I hope to upgrade this project to ROS2 as soon as I get my hands on a Jetson Ori
 - **Autonomous Navigation**: SLAM-based mapping and path planning
 - **Computer Vision Pipeline**: Object detection system for sock identification
 - **Custom Gripper Mechanism**: Design files for sock collection attachment
-
-Future
 
 ## 🛠️ Technologies & Skills Demonstrated
 
