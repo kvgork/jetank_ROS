@@ -9,7 +9,6 @@ from std_msgs.msg import Header
 import gi
 gi.require_version('Gst', '1.0')
 from gi.repository import Gst
-import sys
 import yaml
 
 class JetsonCSICamera:
