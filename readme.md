@@ -82,6 +82,8 @@ Camera implementation
 - [x] Create camera node for video streaming
 - [x] Create camera calibration script
 - [x] Create camera node for point could generation
+- [ ] Make compressed image for point cloud generation
+- [ ] Optimize point cloud generation
 
 Vision implementation
 - [ ] Add item segemntation model
