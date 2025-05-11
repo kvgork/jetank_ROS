@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- Links -->
+  <!-- Gripper base -->
+  <link name="camera_base_plate_link">
+    <visual>
+      <geometry>
+        <box size="${camera_base_length} ${camera_base_width} ${camera_base_heigth}"/>
+      </geometry>
+    </visual>
+  </link>
+  <!-- Camera left -->
+  <link name="camera_left_link">
+    <visual>
+      <geometry>
+        <cylinder length="${camera_heigth}" radius="${camera_radius}"/>
+      </geometry>
+    </visual>
+  </link>
+  <!-- Camera right -->
+  <link name="camera_right_link">
+    <visual>
+      <geometry>
+        <cylinder length="${camera_heigth}" radius="${camera_radius}"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <!-- Joints -->
+  <!-- Camera plate to base -->
+  <joint name="camera_base_plate_to_base_joint" type="fixed">
+    <parent link="camera_base_link"/>
+    <child link="camera_base_plate_link"/>
+    <origin xyz="${arm_camera_length} ${0.0} ${0.0}" rpy="0 0.0 0"/>
+  </joint>
+  <!-- Camera left to base -->
+  <joint name="camera_left_to_base_joint" type="fixed">
+    <parent link="camera_base_plate_link"/>
+    <child link="camera_left_link"/>
+    <origin xyz="${camera_heigth/2} ${camera_dist} ${0.0}" rpy="0 -1.57079632679 0"/>
+  </joint>
+  <!-- Camera right to base -->
+  <joint name="camera_right_to_base_joint" type="fixed">
+    <parent link="camera_base_plate_link"/>
+    <child link="camera_right_link"/>
+    <origin xyz="${camera_heigth/2} ${-camera_dist} ${0.0}" rpy="0 -1.57079632679 0"/>
+  </joint>
+
+
+</robot>
