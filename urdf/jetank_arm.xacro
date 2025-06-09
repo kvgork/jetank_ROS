@@ -19,7 +19,7 @@
     </visual>
   </link>
   <!-- Camera Link -->
-  <link name="camera_link">
+  <link name="camera_base_link">
     <visual>
       <geometry>
         <box size="${arm_camera_length} ${arm_camera_width} ${arm_camera_heigth}"/>
@@ -67,7 +67,7 @@
   <!-- Camera to arm base joint -->
   <joint name="arm_base_to_camera_joint" type="revolute">
     <parent link="arm_base_link"/>
-    <child link="camera_link"/>
+    <child link="camera_base_link"/>
     <origin xyz="${(arm_base_length/2)-0.01} 0 ${-(arm_base_heigth/2)+0.01}" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
     <limit effort="10.0" lower="-1.0" upper="1.0" velocity="1.0"/>

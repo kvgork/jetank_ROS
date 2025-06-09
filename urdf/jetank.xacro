@@ -5,6 +5,8 @@
   <xacro:include filename="$(find robot_main)/urdf/jetank_wheel.xacro"/>
   <xacro:include filename="$(find robot_main)/urdf/jetank_arm.xacro"/>
   <xacro:include filename="$(find robot_main)/urdf/jetank_gripper.xacro"/>
+  <xacro:include filename="$(find robot_main)/urdf/jetank_camera.xacro"/>
+  
 
   <!-- Base link -->
   <link name="base_link" />

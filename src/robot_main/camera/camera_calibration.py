@@ -39,8 +39,8 @@ class StereoCameraCalibrator:
         self.objp *= self.square_size  # Scale to actual size
         
         # Subscriber topics
-        left_image_topic = rospy.get_param('~left_image_topic', '/camera/left/image_raw')
-        right_image_topic = rospy.get_param('~right_image_topic', '/camera/right/image_raw')
+        left_image_topic = rospy.get_param('~left_image_topic', '/stereo/left/image_raw')
+        right_image_topic = rospy.get_param('~right_image_topic', '/stereo/right/image_raw')
         
         # Create subscribers with approximate time synchronization
         self.left_sub = message_filters.Subscriber(left_image_topic, Image)

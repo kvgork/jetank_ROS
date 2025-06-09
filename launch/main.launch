@@ -1,8 +1,10 @@
 <?xml version="1.0"?>
 <launch>
-  <node pkg="robot_main" type="robot.py" name="robot_motors" output="screen">
+  <!-- <node pkg="robot_main" type="robot.py" name="robot_motors" output="screen">
     <param name="track_width" value="0.11"/>
-  </node>
+  </node> -->
 
-  <node pkg="robot_main" type="camera.py" name="stereo_camera_publisher" output="screen"> </node>
+  <!-- <include file="$(find robot_main)/path/filename.launch"/> -->
+  <include file="$(find robot_main)/launch/cameras.launch"/>
+  <include file="$(find robot_main)/launch/display_xacro.launch"/>
 </launch>

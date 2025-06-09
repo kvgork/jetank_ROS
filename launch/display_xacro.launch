@@ -12,5 +12,5 @@
   </node>
 
   <!-- Launch RViz -->
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find robot_main)/rviz/jetank.rviz" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find robot_main)/rviz/rviz.rviz" />
 </launch>
