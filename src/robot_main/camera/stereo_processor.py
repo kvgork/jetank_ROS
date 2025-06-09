@@ -30,8 +30,12 @@ class StereoProcessor:
         self.right_info = None
         
         # Subscribe to camera info once to get calibration data
-        rospy.Subscriber('/stereo/left/camera_info', CameraInfo, self.left_info_callback)
-        rospy.Subscriber('/stereo/right/camera_info', CameraInfo, self.right_info_callback)
+        # self.left_info_sub = message_filters.Subscriber('/stereo/left/camera_info', CameraInfo, self.left_info_callback)
+        # self.right_info_sub = message_filters.Subscriber('/stereo/right/camera_info', CameraInfo, self.right_info_callback)
+        self.left_info_sub = message_filters.Subscriber('/stereo/left/camera_info', CameraInfo)
+        self.right_info_sub = message_filters.Subscriber('/stereo/right/camera_info', CameraInfo)
+        
+
         
         # Wait for camera calibration
         rospy.loginfo("Waiting for camera calibration...")
@@ -50,7 +54,7 @@ class StereoProcessor:
         
         # ApproximateTimeSynchronizer for handling slight timing differences
         self.ts = message_filters.ApproximateTimeSynchronizer(
-            [self.left_sub, self.right_sub], 10, 0.1)
+            [self.left_sub, self.right_sub, self.left_info_sub, self.right_info_sub], 10, 0.03)
         self.ts.registerCallback(self.stereo_callback)
         
         rospy.loginfo("Stereo processor initialized")

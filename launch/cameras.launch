@@ -6,8 +6,8 @@
       <param name="camera_id" value="0"/> <!-- CSI camera 0 -->
       <param name="width" value="640"/>
       <param name="height" value="480"/>
-      <param name="fps" value="30"/>
-      <param name="camera_frame_id" value="left_camera_frame"/>
+      <param name="fps" value="20"/>
+      <param name="camera_frame_id" value="camera_left_link"/>
       <remap from="image_raw" to="/stereo/left/image_raw"/>
       <remap from="camera_info" to="/stereo/left/camera_info"/>
       <remap from="set_camera_info" to="/stereo/left/set_camera_info"/>
@@ -19,8 +19,8 @@
       <param name="camera_id" value="1"/> <!-- CSI camera 1 -->
       <param name="width" value="640"/>
       <param name="height" value="480"/>
-      <param name="fps" value="30"/>
-      <param name="camera_frame_id" value="right_camera_frame"/>
+      <param name="fps" value="20"/>
+      <param name="camera_frame_id" value="camera_right_link"/>
       <remap from="image_raw" to="/stereo/right/image_raw"/>
       <remap from="camera_info" to="/stereo/right/camera_info"/>
       <remap from="set_camera_info" to="/stereo/right/set_camera_info"/>
@@ -28,13 +28,13 @@
     </node>
     
     <!-- Custom Stereo Processor -->
-    <node pkg="robot_main" type="stereo_processor.py" name="stereo_processor" output="screen"/>
+    <node pkg="robot_main" type="stereo_processor_c" name="stereo_processor" output="screen"/>
     
     <!-- TF for camera frames -->
-    <node pkg="tf" type="static_transform_publisher" name="left_camera_frame"
+    <!-- <node pkg="tf" type="static_transform_publisher" name="left_camera_frame"
           args="0 0 0 0 0 0 base_link left_camera_frame 100"/>
     <node pkg="tf" type="static_transform_publisher" name="right_camera_frame"
-          args="0 -0.065 0 0 0 0 base_link right_camera_frame 100"/>
+          args="0 -0.065 0 0 0 0 base_link right_camera_frame 100"/> -->
     
     <!-- Visualization -->
     <!-- <node pkg="rviz" type="rviz" name="rviz" 
