@@ -28,7 +28,7 @@
     </node>
     
     <!-- Custom Stereo Processor -->
-    <node pkg="robot_main" type="stereo_processor_c" name="stereo_processor" output="screen"/>
+    <!-- <node pkg="robot_main" type="stereo_processor" name="stereo_processor" output="screen"/> -->
     
     <!-- TF for camera frames -->
     <!-- <node pkg="tf" type="static_transform_publisher" name="left_camera_frame"

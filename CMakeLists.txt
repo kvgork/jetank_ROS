@@ -37,8 +37,6 @@ catkin_package(
 #  INCLUDE_DIRS include
   LIBRARIES robot_main
   CATKIN_DEPENDS roscpp rospy std_msgs sensor_msgs image_transport pcl_ros message_filters
-  # Removed 'libopencv-dev' and 'libpcl-dev' from DEPENDS as they don't provide CMake variables
-  # and are correctly handled by find_package(OpenCV) and find_package(PCL)
   # DEPENDS libopencv-dev libpcl-dev
 )
 
@@ -58,13 +56,10 @@ include_directories(
   ${CUDA_INCLUDE_DIRS} # Include CUDA headers
 )
 
-## Declare a C++ executable for your stereo processor node
-## Assuming your C++ source file is still named stereo_pointcloud_node.cpp
-## and the ros::init call in main is "stereo_processor".
+## Declare a C++ executable for stereo processor node
 add_executable(stereo_processor src/robot_main/camera/stereo_processor_c.cpp) # Ensure this path is correct
 
 ## Add cmake target dependencies of the executable
-## This ensures that all necessary libraries are built before linking.
 add_dependencies(stereo_processor ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link your executable target against
