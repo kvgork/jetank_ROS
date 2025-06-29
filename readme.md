@@ -1,4 +1,6 @@
-# JeTank ROS Integration
+# [DEPRECATED] JeTank ROS Integration
+
+UPDATE[29/06/2025]: Got my hand on a orin nano super developer kit, so will be fitting that in the frame at start over on ROS2! 
 
 <div align="center">
   <img src="https://www.waveshare.com/media/catalog/product/cache/1/image/800x800/9df78eab33525d08d6e5fb8d27136e95/j/e/jetank-ai-kit-1.jpg" alt="JeTank Robot with ROS Integration" />
